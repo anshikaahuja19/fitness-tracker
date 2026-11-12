@@ -14,6 +14,13 @@ export const getRecentSessions = async (userId, limit = 5) => {
     return response.data || [];
 };
 
+export const getWorkoutHistory = async (userId, { status = 'COMPLETED', limit = 50 } = {}) => {
+    const response = await api.get('/sessions', {
+        params: { userId, status, limit },
+    });
+    return response.data || [];
+};
+
 export const startWorkoutSession = async ({ userId, routineId, name, notes }) => {
     const response = await api.post('/sessions', {
         userId,

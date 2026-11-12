@@ -266,7 +266,13 @@ export default function HomeScreen({ navigation }) {
                 <View style={styles.section}>
                     <View style={styles.sectionHeader}>
                         <Text style={styles.sectionTitle}>Recent Workouts</Text>
-                        <Text style={styles.sectionCount}>{recentSessions.length}</Text>
+                        <Pressable
+                            onPress={() => navigation.navigate(ROUTES.WORKOUT_HISTORY)}
+                            style={({ pressed }) => [styles.newRoutineButton, pressed && { opacity: 0.7 }]}
+                        >
+                            <Text style={styles.newRoutineText}>See All</Text>
+                            <Ionicons name="chevron-forward" size={16} color={colors.primary} />
+                        </Pressable>
                     </View>
 
                     {isLoading ? (
@@ -291,9 +297,15 @@ export default function HomeScreen({ navigation }) {
                                 <Pressable
                                     key={session.id}
                                     style={styles.card}
-                                    onPress={() =>
-                                        navigation.navigate(ROUTES.WORKOUTS, { session })
-                                    }
+                                    onPress={() => {
+                                        if (session.status === 'COMPLETED') {
+                                            navigation.navigate(ROUTES.WORKOUT_HISTORY, {
+                                                initialSessionId: session.id,
+                                            });
+                                        } else {
+                                            navigation.navigate(ROUTES.WORKOUTS, { session });
+                                        }
+                                    }}
                                 >
                                     <View style={styles.cardInfo}>
                                         <Text style={styles.cardTitle}>{session.name}</Text>

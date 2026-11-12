@@ -10,4 +10,5 @@ export const ROUTES = {
   // Main stack (pushed over the tabs)
   MAIN_TABS: 'MainTabs',
   ROUTINE_BUILDER: 'RoutineBuilder',
+  WORKOUT_HISTORY: 'WorkoutHistory',
 };
