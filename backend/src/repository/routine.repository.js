@@ -1,5 +1,15 @@
 const prisma = require('../prisma');
 
+// Pull the exercise name/muscle along with each routine row so clients can render it directly.
+const routineExerciseInclude = {
+    orderBy: { orderIndex: 'asc' },
+    include: {
+        exercise: {
+            select: { id: true, name: true, primaryMuscle: true, equipment: true },
+        },
+    },
+};
+
 const createRoutine = async (params) => {
     const { userId, name, description, isPublic, exercises } = params;
 
@@ -32,9 +42,7 @@ const createRoutine = async (params) => {
         return await tx.workoutRoutine.findUnique({
             where: { id: routine.id },
             include: {
-                routineExercises: {
-                    orderBy: { orderIndex: 'asc' },
-                },
+                routineExercises: routineExerciseInclude,
             },
         });
     });
@@ -50,9 +58,7 @@ const getRoutinesByUserId = async (userId, includePublic = true) => {
                   userId,
               },
         include: {
-            routineExercises: {
-                orderBy: { orderIndex: 'asc' },
-            },
+            routineExercises: routineExerciseInclude,
             _count: {
                 select: {
                     routineExercises: true,
@@ -70,9 +76,7 @@ const getRoutineById = async (id) => {
     return await prisma.workoutRoutine.findUnique({
         where: { id },
         include: {
-            routineExercises: {
-                orderBy: { orderIndex: 'asc' },
-            },
+            routineExercises: routineExerciseInclude,
             _count: {
                 select: {
                     routineExercises: true,
@@ -92,9 +96,7 @@ const updateRoutine = async (id, data) => {
             ...(data.isPublic !== undefined && { isPublic: data.isPublic }),
         },
         include: {
-            routineExercises: {
-                orderBy: { orderIndex: 'asc' },
-            },
+            routineExercises: routineExerciseInclude,
         },
     });
 };
@@ -163,7 +165,37 @@ const updateRoutineExercise = async (id, data) => {
     });
 };
 
+// Replace the whole ordered exercise list in one transaction (used by the Routine Builder).
+// Deleting first avoids clashing with the @@unique([routineId, orderIndex]) constraint on reorder.
+const replaceRoutineExercises = async (routineId, exercises) => {
+    return await prisma.$transaction(async (tx) => {
+        await tx.routineExercise.deleteMany({ where: { routineId } });
+
+        if (exercises.length > 0) {
+            await tx.routineExercise.createMany({
+                data: exercises.map((ex, index) => ({
+                    routineId,
+                    exerciseId: ex.exerciseId,
+                    orderIndex: index,
+                    targetSets: ex.targetSets ?? 3,
+                    targetReps: ex.targetReps ?? '8-12',
+                    restSeconds: ex.restSeconds ?? 90,
+                    notes: ex.notes || null,
+                })),
+            });
+        }
+
+        await tx.workoutRoutine.update({ where: { id: routineId }, data: { updatedAt: new Date() } });
+
+        return await tx.workoutRoutine.findUnique({
+            where: { id: routineId },
+            include: { routineExercises: routineExerciseInclude },
+        });
+    });
+};
+
 module.exports = {
+    replaceRoutineExercises,
     createRoutine,
     getRoutinesByUserId,
     getRoutineById,

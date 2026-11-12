@@ -10,6 +10,7 @@ const {
     getRoutineExercise,
     removeExerciseFromRoutine,
     updateRoutineExercise,
+    replaceRoutineExercises,
 } = require('../repository/routine.repository');
 
 const createNewRoutine = asyncHandler(async (req, res) => {
@@ -193,7 +194,25 @@ const updateExerciseInRoutine = asyncHandler(async (req, res) => {
     });
 });
 
+const replaceExercises = asyncHandler(async (req, res) => {
+    const routineId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+
+    const routine = await getRoutineById(routineId);
+    if (!routine) {
+        throw new AppError('Workout routine not found', 404);
+    }
+
+    const updated = await replaceRoutineExercises(routineId, req.body.exercises);
+
+    return res.status(200).json({
+        success: true,
+        message: 'Routine exercises saved successfully',
+        data: updated,
+    });
+});
+
 module.exports = {
+    replaceExercises,
     createNewRoutine,
     getMyRoutines,
     getRoutine,

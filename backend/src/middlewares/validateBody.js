@@ -145,6 +145,38 @@ const validateUpdateRoutineExercise = asyncHandler(async (req, _res, next) => {
     return next();
 });
 
+const validateReplaceRoutineExercises = asyncHandler(async (req, _res, next) => {
+    const { exercises } = req.body;
+
+    if (!Array.isArray(exercises)) {
+        throw new AppError('exercises must be an array', 400);
+    }
+
+    req.body.exercises = exercises.map((item, i) => {
+        if (!item || typeof item.exerciseId !== 'string' || item.exerciseId.trim() === '') {
+            throw new AppError(`Exercise at index ${i} must contain a valid exerciseId`, 400);
+        }
+        if (item.targetSets !== undefined && (!Number.isInteger(item.targetSets) || item.targetSets <= 0)) {
+            throw new AppError(`targetSets at index ${i} must be a positive integer`, 400);
+        }
+        if (item.targetReps !== undefined && typeof item.targetReps !== 'string') {
+            throw new AppError(`targetReps at index ${i} must be a string`, 400);
+        }
+        if (item.restSeconds !== undefined && (!Number.isInteger(item.restSeconds) || item.restSeconds < 0)) {
+            throw new AppError(`restSeconds at index ${i} must be a non-negative integer`, 400);
+        }
+        return {
+            exerciseId: item.exerciseId.trim(),
+            targetSets: item.targetSets,
+            targetReps: item.targetReps?.trim() || undefined,
+            restSeconds: item.restSeconds,
+            notes: typeof item.notes === 'string' ? item.notes.trim() : null,
+        };
+    });
+
+    return next();
+});
+
 const validateStartSession = asyncHandler(async (req, _res, next) => {
     const rawUserId = req.body.userId || req.headers['x-user-id'];
     const { routineId, name, notes } = req.body;
@@ -339,6 +371,7 @@ module.exports = {
     validateUpdateRoutine,
     validateAddExercise,
     validateUpdateRoutineExercise,
+    validateReplaceRoutineExercises,
     validateStartSession,
     validateUpdateSession,
     validateBatchSets,
