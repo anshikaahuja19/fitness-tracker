@@ -1,3 +1,4 @@
+require('dotenv').config();
 const prisma = require('../src/prisma');
 
 const exercises = [
@@ -543,41 +544,44 @@ async function main() {
   let updatedCount = 0;
 
   for (const ex of exercises) {
-    const result = await prisma.exercise.upsert({
+    const existing = await prisma.exercise.findFirst({
       where: {
-        name_createdById: {
-          name: ex.name,
-          createdById: null,
-        },
-      },
-      update: {
-        description: ex.description,
-        instructions: ex.instructions,
-        category: ex.category,
-        primaryMuscle: ex.primaryMuscle,
-        secondaryMuscles: ex.secondaryMuscles,
-        equipment: ex.equipment,
-        difficulty: ex.difficulty,
-        isCustom: false,
-      },
-      create: {
         name: ex.name,
-        description: ex.description,
-        instructions: ex.instructions,
-        category: ex.category,
-        primaryMuscle: ex.primaryMuscle,
-        secondaryMuscles: ex.secondaryMuscles,
-        equipment: ex.equipment,
-        difficulty: ex.difficulty,
-        isCustom: false,
         createdById: null,
       },
     });
 
-    if (result.createdAt.getTime() === result.updatedAt.getTime()) {
-      createdCount++;
-    } else {
+    if (existing) {
+      await prisma.exercise.update({
+        where: { id: existing.id },
+        data: {
+          description: ex.description,
+          instructions: ex.instructions,
+          category: ex.category,
+          primaryMuscle: ex.primaryMuscle,
+          secondaryMuscles: ex.secondaryMuscles,
+          equipment: ex.equipment,
+          difficulty: ex.difficulty,
+          isCustom: false,
+        },
+      });
       updatedCount++;
+    } else {
+      await prisma.exercise.create({
+        data: {
+          name: ex.name,
+          description: ex.description,
+          instructions: ex.instructions,
+          category: ex.category,
+          primaryMuscle: ex.primaryMuscle,
+          secondaryMuscles: ex.secondaryMuscles,
+          equipment: ex.equipment,
+          difficulty: ex.difficulty,
+          isCustom: false,
+          createdById: null,
+        },
+      });
+      createdCount++;
     }
   }
 
