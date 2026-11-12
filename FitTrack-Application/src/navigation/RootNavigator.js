@@ -2,7 +2,7 @@ import { ActivityIndicator, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
 import AuthNavigator from './AuthNavigator';
-import MainTabNavigator from './MainTabNavigator';
+import MainStackNavigator from './MainStackNavigator';
 
 // Switches between Auth stack and Main tabs based on auth state.
 export default function RootNavigator() {
@@ -18,7 +18,7 @@ export default function RootNavigator() {
 
   return (
     <NavigationContainer>
-      {isAuthenticated ? <MainTabNavigator /> : <AuthNavigator />}
+      {isAuthenticated ? <MainStackNavigator /> : <AuthNavigator />}
     </NavigationContainer>
   );
 }

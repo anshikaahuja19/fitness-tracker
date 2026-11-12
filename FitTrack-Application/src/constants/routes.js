@@ -7,4 +7,7 @@ export const ROUTES = {
   WORKOUTS: 'Workouts',
   EXERCISES: 'Exercises',
   PROFILE: 'Profile',
+  // Main stack (pushed over the tabs)
+  MAIN_TABS: 'MainTabs',
+  ROUTINE_BUILDER: 'RoutineBuilder',
 };
