@@ -90,6 +90,15 @@ export default function HomeScreen({ navigation }) {
         loadDashboard();
     }, [loadDashboard]);
 
+    // Refresh when coming back from the Routine Builder (or any pushed screen).
+    useEffect(() => {
+        const unsubscribe = navigation.addListener('focus', () => loadDashboard());
+        return unsubscribe;
+    }, [navigation, loadDashboard]);
+
+    const openRoutineBuilder = (routineId) =>
+        navigation.navigate(ROUTES.ROUTINE_BUILDER, routineId ? { routineId } : undefined);
+
     const handleStartWorkout = async (routine = null) => {
         const targetKey = routine ? routine.id : 'freestyle';
         setStartingTarget(targetKey);
@@ -183,7 +192,14 @@ export default function HomeScreen({ navigation }) {
                 <View style={styles.section}>
                     <View style={styles.sectionHeader}>
                         <Text style={styles.sectionTitle}>My Routines</Text>
-                        <Text style={styles.sectionCount}>{routines.length}</Text>
+                        <Pressable
+                            style={styles.newRoutineButton}
+                            onPress={() => openRoutineBuilder()}
+                            hitSlop={8}
+                        >
+                            <Ionicons name="add" size={16} color={colors.primary} />
+                            <Text style={styles.newRoutineText}>New</Text>
+                        </Pressable>
                     </View>
 
                     {isLoading ? (
@@ -197,8 +213,14 @@ export default function HomeScreen({ navigation }) {
                             <Ionicons name="barbell-outline" size={24} color={colors.textMuted} />
                             <Text style={styles.emptyTitle}>No routines yet</Text>
                             <Text style={styles.emptySubtitle}>
-                                Start an empty workout above or save a routine template.
+                                Build a routine template to start workouts in one tap.
                             </Text>
+                            <Button
+                                title="Create Routine"
+                                variant="outline"
+                                size="sm"
+                                onPress={() => openRoutineBuilder()}
+                            />
                         </View>
                     ) : (
                         routines.map((routine) => {
@@ -210,13 +232,18 @@ export default function HomeScreen({ navigation }) {
 
                             return (
                                 <View key={routine.id} style={styles.card}>
-                                    <View style={styles.cardInfo}>
+                                    <Pressable
+                                        style={styles.cardInfo}
+                                        disabled={routine.userId !== user?.id}
+                                        onPress={() => openRoutineBuilder(routine.id)}
+                                    >
                                         <Text style={styles.cardTitle}>{routine.name}</Text>
                                         <Text style={styles.cardSubtitle}>
                                             {exerciseCount}{' '}
                                             {exerciseCount === 1 ? 'exercise' : 'exercises'}
+                                            {routine.userId === user?.id ? ' • Tap to edit' : ''}
                                         </Text>
-                                    </View>
+                                    </Pressable>
                                     <Pressable
                                         style={({ pressed }) => [
                                             styles.startChip,
@@ -388,6 +415,16 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: '700',
         color: colors.text,
+    },
+    newRoutineButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 2,
+    },
+    newRoutineText: {
+        color: colors.primary,
+        fontWeight: '600',
+        fontSize: 14,
     },
     sectionCount: {
         fontSize: 13,
