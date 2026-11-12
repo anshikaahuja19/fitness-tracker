@@ -64,6 +64,19 @@ const getSessionsByUserId = async (userId, { status, limit } = {}) => {
                     name: true,
                 },
             },
+            setLogs: {
+                orderBy: [{ createdAt: 'asc' }, { setNumber: 'asc' }],
+                include: {
+                    exercise: {
+                        select: {
+                            id: true,
+                            name: true,
+                            primaryMuscle: true,
+                            equipment: true,
+                        },
+                    },
+                },
+            },
             _count: {
                 select: {
                     setLogs: true,
