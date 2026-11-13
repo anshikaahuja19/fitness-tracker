@@ -23,6 +23,8 @@ model SetLog {
 
   @@index([workoutSessionId])
   @@index([exerciseId])
+  @@index([exerciseId, isCompleted])
+  @@index([workoutSessionId, exerciseId])
   @@map("set_logs")
 }
 
@@ -45,6 +47,9 @@ model PersonalRecord {
 
   @@index([userId])
   @@index([exerciseId])
+  @@index([userId, exerciseId])
+  @@index([userId, recordType])
+  @@index([userId, exerciseId, recordType])
   @@index([setLogId])
   @@map("personal_records")
 }

@@ -18,6 +18,7 @@ model WorkoutRoutine {
   workoutSessions  WorkoutSession[]
 
   @@index([userId])
+  @@index([userId, isPublic])
   @@map("workout_routines")
 }
 
@@ -62,6 +63,8 @@ model WorkoutSession {
   @@index([userId])
   @@index([status])
   @@index([startTime])
+  @@index([routineId])
   @@index([userId, status])
+  @@index([userId, status, startTime])
   @@map("workout_sessions")
 }

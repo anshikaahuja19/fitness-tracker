@@ -404,14 +404,17 @@ const getStrengthProgression = async (userId, exerciseId, timeRange = 'all') => 
 };
 
 /**
- * Returns top exercises performed by user, useful for chart dropdowns.
+ * Returns top exercises performed by user, optimized with database-level aggregation.
  *
  * @param {string} userId
  * @param {number} [limit=5]
  * @returns {Promise<Array<object>>}
  */
 const getTopExercises = async (userId, limit = 5) => {
-  const setLogs = await prisma.setLog.findMany({
+  const safeLimit = Math.min(Math.max(parseInt(limit, 10) || 5, 1), 20);
+
+  const grouped = await prisma.setLog.groupBy({
+    by: ['exerciseId'],
     where: {
       isCompleted: true,
       workoutSession: {
@@ -419,37 +422,46 @@ const getTopExercises = async (userId, limit = 5) => {
         status: 'COMPLETED',
       },
     },
-    select: {
+    _count: {
       exerciseId: true,
-      exercise: {
-        select: {
-          id: true,
-          name: true,
-          primaryMuscle: true,
-          category: true,
-        },
+    },
+    orderBy: {
+      _count: {
+        exerciseId: 'desc',
       },
+    },
+    take: safeLimit,
+  });
+
+  if (grouped.length === 0) {
+    return [];
+  }
+
+  const exerciseIds = grouped.map((g) => g.exerciseId);
+  const exercises = await prisma.exercise.findMany({
+    where: {
+      id: { in: exerciseIds },
+    },
+    select: {
+      id: true,
+      name: true,
+      primaryMuscle: true,
+      category: true,
     },
   });
 
-  const countMap = new Map();
-  for (const log of setLogs) {
-    if (!countMap.has(log.exerciseId)) {
-      countMap.set(log.exerciseId, {
-        exercise: log.exercise,
-        count: 0,
-      });
-    }
-    countMap.get(log.exerciseId).count += 1;
-  }
+  const exerciseMap = new Map(exercises.map((e) => [e.id, e]));
 
-  return Array.from(countMap.values())
-    .sort((a, b) => b.count - a.count)
-    .slice(0, limit)
-    .map((item) => ({
-      ...item.exercise,
-      totalSetsLogged: item.count,
-    }));
+  return grouped
+    .map((g) => {
+      const exercise = exerciseMap.get(g.exerciseId);
+      if (!exercise) return null;
+      return {
+        ...exercise,
+        totalSetsLogged: g._count.exerciseId,
+      };
+    })
+    .filter(Boolean);
 };
 
 module.exports = {

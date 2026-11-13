@@ -166,8 +166,9 @@ const recalculateSessionVolume = async (tx, workoutSessionId) => {
 
 const batchSaveSetLogs = async (workoutSessionId, sets, { replace = false } = {}) => {
     return await prisma.$transaction(async (tx) => {
+        const incomingIds = sets.map((item) => item.id).filter(Boolean);
+
         if (replace) {
-            const incomingIds = sets.map((item) => item.id).filter(Boolean);
             await tx.setLog.deleteMany({
                 where: {
                     workoutSessionId,
@@ -176,16 +177,22 @@ const batchSaveSetLogs = async (workoutSessionId, sets, { replace = false } = {}
             });
         }
 
+        // Optimized: Batch fetch existing set IDs in a single query to eliminate N+1 queries
+        const existingSetIdSet = new Set();
+        if (incomingIds.length > 0) {
+            const existingSets = await tx.setLog.findMany({
+                where: {
+                    id: { in: incomingIds },
+                    workoutSessionId,
+                },
+                select: { id: true },
+            });
+            existingSets.forEach((item) => existingSetIdSet.add(item.id));
+        }
+
         for (const item of sets) {
             if (item.id) {
-                const existingSet = await tx.setLog.findFirst({
-                    where: {
-                        id: item.id,
-                        workoutSessionId,
-                    },
-                });
-
-                if (!existingSet) {
+                if (!existingSetIdSet.has(item.id)) {
                     throw new AppError(`SetLog ${item.id} not found in this workout session`, 404);
                 }
 

@@ -24,5 +24,7 @@ model Exercise {
   @@unique([name, createdById])
   @@index([category])
   @@index([primaryMuscle])
+  @@index([createdById])
+  @@index([isCustom])
   @@map("exercises")
 }
