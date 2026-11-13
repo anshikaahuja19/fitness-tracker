@@ -142,6 +142,7 @@ const detectAndSavePRs = async ({ userId, exerciseId, setLogId, weight, reps, tx
       }
 
       newPRsAchieved.push({
+        id: savedRecord.id,
         recordType: candidate.recordType,
         value: candidate.value,
         weight: candidate.weight,
