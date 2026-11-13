@@ -132,7 +132,32 @@ const validateListQuery = asyncHandler(async (req, _res, next) => {
     return next();
 });
 
+// GET /exercises/previous-sets?ids=a,b,c&excludeSessionId=x
+const validatePreviousSetsQuery = (req, _res, next) => {
+    const raw = typeof req.query.ids === 'string' ? req.query.ids : '';
+    const ids = [...new Set(raw.split(',').map((id) => id.trim()).filter(Boolean))];
+
+    if (ids.length === 0) {
+        return next(new AppError('ids query parameter is required (comma-separated exercise IDs)', 400));
+    }
+    if (ids.length > 50) {
+        return next(new AppError('A maximum of 50 exercise IDs can be requested at once', 400));
+    }
+    if (!ids.every((id) => UUID_REGEX.test(id))) {
+        return next(new AppError('ids must be valid exercise IDs', 400));
+    }
+
+    const { excludeSessionId } = req.query;
+    if (excludeSessionId !== undefined && (typeof excludeSessionId !== 'string' || !UUID_REGEX.test(excludeSessionId))) {
+        return next(new AppError('excludeSessionId must be a valid session ID', 400));
+    }
+
+    req.previousSetsQuery = { ids, excludeSessionId };
+    return next();
+};
+
 module.exports = {
+    validatePreviousSetsQuery,
     validateCreateExercise,
     validateUpdateExercise,
     validateExerciseId,

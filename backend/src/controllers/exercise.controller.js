@@ -4,6 +4,7 @@ const AppError = require('../utils/error');
 const {
     listExercises,
     findVisibleExercise,
+    findPreviousSets,
     createCustomExercise,
     updateExercise,
     deleteExercise,
@@ -71,6 +72,18 @@ const getExerciseById = asyncHandler(async (req, res) => {
     });
 });
 
+// "Previous" column in the workout logger: what the user did last time for each exercise.
+const getPreviousSets = asyncHandler(async (req, res) => {
+    const { ids, excludeSessionId } = req.previousSetsQuery;
+    const data = await findPreviousSets(req.user.id, ids, { excludeSessionId });
+
+    return res.status(200).json({
+        success: true,
+        message: 'Previous sets fetched successfully',
+        data,
+    });
+});
+
 const createExercise = asyncHandler(async (req, res) => {
     let exercise;
     try {
@@ -122,6 +135,7 @@ module.exports = {
     getExercises,
     getExerciseOptions,
     getExerciseById,
+    getPreviousSets,
     createExercise,
     editExercise,
     removeExercise,
