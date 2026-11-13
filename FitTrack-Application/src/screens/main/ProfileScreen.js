@@ -3,6 +3,7 @@ import { ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, StyleShe
 import { Button, Card, Chip, Input, ScreenContainer } from '../../components';
 import { useAuth } from '../../context/AuthContext';
 import { fetchProfile, updateProfile } from '../../services/profile';
+import { ROUTES } from '../../constants/routes';
 import { colors, spacing, typography } from '../../constants/theme';
 import { formatEnum, kgToLbs, lbsToKg } from '../../utils/format';
 
@@ -38,7 +39,7 @@ const formFromUser = (user, unit) => ({
   goal: user.profile?.goal ?? null,
 });
 
-export default function ProfileScreen() {
+export default function ProfileScreen({ navigation }) {
   const { signOut, setSession, token } = useAuth();
   const [user, setUser] = useState(null);
   const [form, setForm] = useState(null);
@@ -183,6 +184,11 @@ export default function ProfileScreen() {
           {message ? <Text style={styles.success}>{message}</Text> : null}
 
           <Button title="Save changes" onPress={save} loading={saving} />
+          <Button
+            title="View Progress & Analytics"
+            variant="outline"
+            onPress={() => navigation.navigate(ROUTES.ANALYTICS)}
+          />
           <Button title="Log out" variant="outline" onPress={signOut} disabled={saving} />
         </ScrollView>
       </KeyboardAvoidingView>

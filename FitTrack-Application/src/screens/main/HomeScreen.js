@@ -13,7 +13,7 @@ import ScreenContainer from '../../components/ScreenContainer';
 import Button from '../../components/Button';
 import { useAuth } from '../../context/AuthContext';
 import { ROUTES } from '../../constants/routes';
-import { colors, spacing } from '../../constants/theme';
+import { colors, radius, spacing } from '../../constants/theme';
 import {
     getRecentSessions,
     getUserRoutines,
@@ -148,8 +148,17 @@ export default function HomeScreen({ navigation }) {
                 }
             >
                 <View style={styles.header}>
-                    <Text style={styles.dateText}>{todayLabel}</Text>
-                    <Text style={styles.title}>Hey, {displayName}</Text>
+                    <View style={styles.headerTitleWrap}>
+                        <Text style={styles.dateText}>{todayLabel}</Text>
+                        <Text style={styles.title}>Hey, {displayName}</Text>
+                    </View>
+                    <Pressable
+                        style={({ pressed }) => [styles.analyticsIconBtn, pressed && { opacity: 0.7 }]}
+                        onPress={() => navigation.navigate(ROUTES.ANALYTICS)}
+                    >
+                        <Ionicons name="stats-chart" size={16} color={colors.primary} />
+                        <Text style={styles.analyticsIconBtnText}>Charts</Text>
+                    </Pressable>
                 </View>
 
                 {offlineNotice && (
@@ -265,6 +274,37 @@ export default function HomeScreen({ navigation }) {
 
                 <View style={styles.section}>
                     <View style={styles.sectionHeader}>
+                        <Text style={styles.sectionTitle}>Training Analytics</Text>
+                        <Pressable
+                            onPress={() => navigation.navigate(ROUTES.ANALYTICS)}
+                            style={({ pressed }) => [styles.newRoutineButton, pressed && { opacity: 0.7 }]}
+                        >
+                            <Text style={styles.newRoutineText}>View Charts</Text>
+                            <Ionicons name="chevron-forward" size={16} color={colors.primary} />
+                        </Pressable>
+                    </View>
+
+                    <Pressable
+                        style={({ pressed }) => [styles.analyticsBanner, pressed && { opacity: 0.85 }]}
+                        onPress={() => navigation.navigate(ROUTES.ANALYTICS)}
+                    >
+                        <View style={styles.analyticsBannerLeft}>
+                            <View style={styles.analyticsIconCircle}>
+                                <Ionicons name="trending-up" size={22} color={colors.primary} />
+                            </View>
+                            <View style={styles.analyticsBannerInfo}>
+                                <Text style={styles.analyticsBannerTitle}>Progress & Analytics</Text>
+                                <Text style={styles.analyticsBannerSub}>
+                                    Weekly consistency, strength progression & PR charts
+                                </Text>
+                            </View>
+                        </View>
+                        <Ionicons name="chevron-forward" size={18} color={colors.primary} />
+                    </Pressable>
+                </View>
+
+                <View style={styles.section}>
+                    <View style={styles.sectionHeader}>
                         <Text style={styles.sectionTitle}>Recent Workouts</Text>
                         <Pressable
                             onPress={() => navigation.navigate(ROUTES.WORKOUT_HISTORY)}
@@ -347,7 +387,67 @@ const styles = StyleSheet.create({
         paddingBottom: spacing.xl,
     },
     header: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
         marginBottom: spacing.md,
+    },
+    headerTitleWrap: {
+        flex: 1,
+    },
+    analyticsIconBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: spacing.xs,
+        backgroundColor: colors.surface,
+        borderWidth: 1,
+        borderColor: colors.border,
+        paddingHorizontal: spacing.sm,
+        paddingVertical: 6,
+        borderRadius: radius.pill,
+    },
+    analyticsIconBtnText: {
+        fontSize: 12,
+        fontWeight: '600',
+        color: colors.primary,
+    },
+    analyticsBanner: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        backgroundColor: colors.surface,
+        borderWidth: 1,
+        borderColor: colors.border,
+        borderRadius: 12,
+        padding: spacing.md,
+    },
+    analyticsBannerLeft: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        flex: 1,
+        marginRight: spacing.sm,
+    },
+    analyticsIconCircle: {
+        width: 40,
+        height: 40,
+        borderRadius: radius.pill,
+        backgroundColor: '#DBEAFE',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: spacing.sm,
+    },
+    analyticsBannerInfo: {
+        flex: 1,
+    },
+    analyticsBannerTitle: {
+        fontSize: 15,
+        fontWeight: '600',
+        color: colors.text,
+    },
+    analyticsBannerSub: {
+        fontSize: 12,
+        color: colors.textMuted,
+        marginTop: 2,
     },
     dateText: {
         fontSize: 13,

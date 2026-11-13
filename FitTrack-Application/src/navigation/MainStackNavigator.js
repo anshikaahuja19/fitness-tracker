@@ -2,6 +2,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import MainTabNavigator from './MainTabNavigator';
 import RoutineBuilderScreen from '../screens/routines/RoutineBuilderScreen';
 import WorkoutHistoryScreen from '../screens/workouts/WorkoutHistoryScreen';
+import AnalyticsScreen from '../screens/analytics/AnalyticsScreen';
 import { ROUTES } from '../constants/routes';
 
 const Stack = createNativeStackNavigator();
@@ -18,6 +19,10 @@ export default function MainStackNavigator() {
             <Stack.Screen
                 name={ROUTES.WORKOUT_HISTORY}
                 component={WorkoutHistoryScreen}
+            />
+            <Stack.Screen
+                name={ROUTES.ANALYTICS}
+                component={AnalyticsScreen}
             />
         </Stack.Navigator>
     );

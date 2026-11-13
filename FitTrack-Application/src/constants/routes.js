@@ -11,4 +11,5 @@ export const ROUTES = {
   MAIN_TABS: 'MainTabs',
   ROUTINE_BUILDER: 'RoutineBuilder',
   WORKOUT_HISTORY: 'WorkoutHistory',
+  ANALYTICS: 'Analytics',
 };
