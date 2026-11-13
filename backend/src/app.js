@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 
 const authRouter = require('./routes/auth.routes');
 const userRouter = require('./routes/user.routes');
@@ -32,7 +33,28 @@ app.use(cors({
   },
   credentials: true,
 }));
-app.use(express.json());
+
+// Rate limiting — 100 requests per 15 minutes per IP
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests, please try again later.' },
+});
+app.use('/api/', apiLimiter);
+
+// Stricter rate limit for auth routes — 20 requests per 15 minutes
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many auth attempts, please try again later.' },
+});
+app.use('/api/auth', authLimiter);
+
+app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true }));
 
 app.get('/api/health', (req, res) => {
