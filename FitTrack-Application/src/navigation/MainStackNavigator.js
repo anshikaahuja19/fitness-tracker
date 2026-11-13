@@ -3,6 +3,7 @@ import MainTabNavigator from './MainTabNavigator';
 import RoutineBuilderScreen from '../screens/routines/RoutineBuilderScreen';
 import WorkoutHistoryScreen from '../screens/workouts/WorkoutHistoryScreen';
 import AnalyticsScreen from '../screens/analytics/AnalyticsScreen';
+import PersonalRecordsScreen from '../screens/prs/PersonalRecordsScreen';
 import { ROUTES } from '../constants/routes';
 
 const Stack = createNativeStackNavigator();
@@ -23,6 +24,10 @@ export default function MainStackNavigator() {
             <Stack.Screen
                 name={ROUTES.ANALYTICS}
                 component={AnalyticsScreen}
+            />
+            <Stack.Screen
+                name={ROUTES.PERSONAL_RECORDS}
+                component={PersonalRecordsScreen}
             />
         </Stack.Navigator>
     );

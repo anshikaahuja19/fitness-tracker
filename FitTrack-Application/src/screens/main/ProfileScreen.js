@@ -185,6 +185,11 @@ export default function ProfileScreen({ navigation }) {
 
           <Button title="Save changes" onPress={save} loading={saving} />
           <Button
+            title="Personal Records Showcase"
+            variant="outline"
+            onPress={() => navigation.navigate(ROUTES.PERSONAL_RECORDS)}
+          />
+          <Button
             title="View Progress & Analytics"
             variant="outline"
             onPress={() => navigation.navigate(ROUTES.ANALYTICS)}

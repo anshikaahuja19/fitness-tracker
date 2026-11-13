@@ -14,7 +14,9 @@ import { BarChart, LineChart } from 'react-native-gifted-charts';
 import ScreenContainer from '../../components/ScreenContainer';
 import Card from '../../components/Card';
 import Chip from '../../components/Chip';
+import { SkeletonCard, SkeletonChart } from '../../components/Skeleton';
 import { useAuth } from '../../context/AuthContext';
+import { ROUTES } from '../../constants/routes';
 import {
     getAnalyticsCharts,
     getAnalyticsSummary,
@@ -55,7 +57,7 @@ const formatVolume = (val) => {
     return `${Math.round(val)} kg`;
 };
 
-export default function AnalyticsScreen({ navigation }) {
+export default function AnalyticsScreen({ navigation, route }) {
     const { user } = useAuth();
     const userId = user?.id;
 
@@ -72,11 +74,18 @@ export default function AnalyticsScreen({ navigation }) {
 
     // Strength progression chart
     const [topExercises, setTopExercises] = useState([]);
-    const [selectedExerciseId, setSelectedExerciseId] = useState(null);
+    const [selectedExerciseId, setSelectedExerciseId] = useState(route?.params?.exerciseId || null);
     const [selectedTimeRange, setSelectedTimeRange] = useState('all');
     const [selectedMetric, setSelectedMetric] = useState('maxWeightKg');
     const [progressionData, setProgressionData] = useState(null);
     const [isProgressionLoading, setIsProgressionLoading] = useState(false);
+
+    useEffect(() => {
+        if (route?.params?.exerciseId && route.params.exerciseId !== selectedExerciseId) {
+            setSelectedExerciseId(route.params.exerciseId);
+            loadProgressionForExercise(route.params.exerciseId, selectedTimeRange);
+        }
+    }, [route?.params?.exerciseId]);
 
     // Initial Full Load
     const loadAllAnalytics = useCallback(async (isRefresh = false) => {
@@ -275,9 +284,15 @@ export default function AnalyticsScreen({ navigation }) {
                 }
             >
                 {isLoading ? (
-                    <View style={styles.centered}>
-                        <ActivityIndicator size="large" color={colors.primary} />
-                        <Text style={styles.loadingText}>Loading analytics...</Text>
+                    <View style={styles.skeletonWrap}>
+                        <View style={styles.kpiGrid}>
+                            <SkeletonCard style={styles.kpiCard} />
+                            <SkeletonCard style={styles.kpiCard} />
+                            <SkeletonCard style={styles.kpiCard} />
+                            <SkeletonCard style={styles.kpiCard} />
+                        </View>
+                        <SkeletonChart height={200} />
+                        <SkeletonChart height={220} />
                     </View>
                 ) : error ? (
                     <Card style={styles.errorCard}>
@@ -321,14 +336,22 @@ export default function AnalyticsScreen({ navigation }) {
                             </Card>
 
                             <Card style={styles.kpiCard}>
-                                <View style={styles.kpiHeader}>
-                                    <Text style={styles.kpiLabel}>PRs Hit</Text>
-                                    <View style={[styles.kpiIconWrap, { backgroundColor: '#FEF3C7' }]}>
-                                        <Ionicons name="trophy" size={16} color={colors.pr} />
+                                <Pressable
+                                    onPress={() => navigation.navigate(ROUTES.PERSONAL_RECORDS)}
+                                    style={({ pressed }) => [pressed && { opacity: 0.7 }]}
+                                >
+                                    <View style={styles.kpiHeader}>
+                                        <Text style={styles.kpiLabel}>PRs Hit</Text>
+                                        <View style={[styles.kpiIconWrap, { backgroundColor: '#FEF3C7' }]}>
+                                            <Ionicons name="trophy" size={16} color={colors.pr} />
+                                        </View>
                                     </View>
-                                </View>
-                                <Text style={styles.kpiValue}>{summary?.totalPRs ?? 0}</Text>
-                                <Text style={styles.kpiSub}>All-time bests</Text>
+                                    <Text style={styles.kpiValue}>{summary?.totalPRs ?? 0}</Text>
+                                    <View style={styles.kpiNavRow}>
+                                        <Text style={styles.kpiSub}>All-time bests</Text>
+                                        <Ionicons name="chevron-forward" size={12} color={colors.pr} />
+                                    </View>
+                                </Pressable>
                             </Card>
 
                             <Card style={styles.kpiCard}>
@@ -704,6 +727,14 @@ const styles = StyleSheet.create({
         ...typography.h2,
         fontSize: 22,
         marginVertical: 2,
+    },
+    kpiNavRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+    skeletonWrap: {
+        gap: spacing.md,
     },
     kpiUnit: {
         fontSize: 14,

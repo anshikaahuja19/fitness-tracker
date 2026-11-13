@@ -12,6 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 import Button from '../../components/Button';
 import Card from '../../components/Card';
 import ScreenContainer from '../../components/ScreenContainer';
+import { SkeletonCard } from '../../components/Skeleton';
 import { ROUTES } from '../../constants/routes';
 import { colors, radius, spacing, typography } from '../../constants/theme';
 import { useAuth } from '../../context/AuthContext';
@@ -258,7 +259,11 @@ export default function WorkoutHistoryScreen({ navigation, route }) {
             </View>
 
             {loading ? (
-                <ActivityIndicator style={styles.loader} color={colors.primary} />
+                <View style={styles.skeletonContainer}>
+                    <SkeletonCard />
+                    <SkeletonCard />
+                    <SkeletonCard />
+                </View>
             ) : error ? (
                 <Card style={styles.stateCard}>
                     <Ionicons name="cloud-offline-outline" size={28} color={colors.error} />
@@ -489,6 +494,9 @@ const styles = StyleSheet.create({
         ...typography.caption,
         textAlign: 'center',
         marginBottom: spacing.xs,
+    },
+    skeletonContainer: {
+        gap: spacing.sm,
     },
 });
 

@@ -12,4 +12,5 @@ export const ROUTES = {
   ROUTINE_BUILDER: 'RoutineBuilder',
   WORKOUT_HISTORY: 'WorkoutHistory',
   ANALYTICS: 'Analytics',
+  PERSONAL_RECORDS: 'PersonalRecords',
 };

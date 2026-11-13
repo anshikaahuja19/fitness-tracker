@@ -11,6 +11,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import ScreenContainer from '../../components/ScreenContainer';
 import Button from '../../components/Button';
+import { SkeletonCard } from '../../components/Skeleton';
 import { useAuth } from '../../context/AuthContext';
 import { ROUTES } from '../../constants/routes';
 import { colors, radius, spacing } from '../../constants/theme';
@@ -212,11 +213,10 @@ export default function HomeScreen({ navigation }) {
                     </View>
 
                     {isLoading ? (
-                        <ActivityIndicator
-                            size="small"
-                            color={colors.primary}
-                            style={styles.loader}
-                        />
+                        <>
+                            <SkeletonCard />
+                            <SkeletonCard />
+                        </>
                     ) : routines.length === 0 ? (
                         <View style={styles.emptyCard}>
                             <Ionicons name="barbell-outline" size={24} color={colors.textMuted} />
@@ -305,6 +305,37 @@ export default function HomeScreen({ navigation }) {
 
                 <View style={styles.section}>
                     <View style={styles.sectionHeader}>
+                        <Text style={styles.sectionTitle}>Personal Records</Text>
+                        <Pressable
+                            onPress={() => navigation.navigate(ROUTES.PERSONAL_RECORDS)}
+                            style={({ pressed }) => [styles.newRoutineButton, pressed && { opacity: 0.7 }]}
+                        >
+                            <Text style={styles.newRoutineText}>Trophy Shelf</Text>
+                            <Ionicons name="chevron-forward" size={16} color={colors.primary} />
+                        </Pressable>
+                    </View>
+
+                    <Pressable
+                        style={({ pressed }) => [styles.analyticsBanner, pressed && { opacity: 0.85 }]}
+                        onPress={() => navigation.navigate(ROUTES.PERSONAL_RECORDS)}
+                    >
+                        <View style={styles.analyticsBannerLeft}>
+                            <View style={[styles.analyticsIconCircle, { backgroundColor: '#FEF3C7' }]}>
+                                <Ionicons name="trophy" size={22} color="#D97706" />
+                            </View>
+                            <View style={styles.analyticsBannerInfo}>
+                                <Text style={styles.analyticsBannerTitle}>Personal Records Showcase</Text>
+                                <Text style={styles.analyticsBannerSub}>
+                                    Max weight, reps, 1RM & volume personal bests
+                                </Text>
+                            </View>
+                        </View>
+                        <Ionicons name="chevron-forward" size={18} color={colors.primary} />
+                    </Pressable>
+                </View>
+
+                <View style={styles.section}>
+                    <View style={styles.sectionHeader}>
                         <Text style={styles.sectionTitle}>Recent Workouts</Text>
                         <Pressable
                             onPress={() => navigation.navigate(ROUTES.WORKOUT_HISTORY)}
@@ -316,11 +347,10 @@ export default function HomeScreen({ navigation }) {
                     </View>
 
                     {isLoading ? (
-                        <ActivityIndicator
-                            size="small"
-                            color={colors.primary}
-                            style={styles.loader}
-                        />
+                        <>
+                            <SkeletonCard />
+                            <SkeletonCard />
+                        </>
                     ) : recentSessions.length === 0 ? (
                         <View style={styles.emptyCard}>
                             <Ionicons name="time-outline" size={24} color={colors.textMuted} />
