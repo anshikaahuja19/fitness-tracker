@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
 
 const authRouter = require('./routes/auth.routes');
 const userRouter = require('./routes/user.routes');
@@ -11,6 +12,9 @@ const analyticsRouter = require('./routes/analytics.routes');
 const { errorHandler, notFoundHandler } = require('./middlewares/errorHandler');
 
 const app = express();
+
+// Security headers
+app.use(helmet());
 
 app.use(cors());
 app.use(express.json());
