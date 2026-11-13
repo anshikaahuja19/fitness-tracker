@@ -17,14 +17,12 @@ const app = express();
 // Security headers
 app.use(helmet());
 
-// CORS configuration — whitelist production and local origins
 const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(',')
   : ['http://localhost:3000', 'http://localhost:8081', 'http://localhost:19006'];
 
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (mobile apps, Postman, curl)
     if (!origin) return callback(null, true);
     if (allowedOrigins.indexOf(origin) !== -1) {
       return callback(null, true);
@@ -44,7 +42,6 @@ const apiLimiter = rateLimit({
 });
 app.use('/api/', apiLimiter);
 
-// Stricter rate limit for auth routes — 20 requests per 15 minutes
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 20,
@@ -81,7 +78,6 @@ app.use('/api/v1/analytics', analyticsRouter);
 app.use('/api/analytics', analyticsRouter);
 app.use('/analytics', analyticsRouter);
 
-// 404 & Global Error Handling
 app.use(notFoundHandler);
 app.use(errorHandler);
 

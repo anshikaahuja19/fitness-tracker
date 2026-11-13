@@ -1,15 +1,8 @@
-#!/bin/bash
-# deploy.sh — Production deployment script for FitTrack Backend
-# Usage: bash scripts/deploy.sh
-# Runs database migrations, seeds exercises, and optionally seeds demo user
-
 set -e
-
 echo "========================================="
 echo "  FitTrack Backend — Production Deploy"
 echo "========================================="
 
-# Verify required environment variables
 if [ -z "$DATABASE_URL" ]; then
   echo "❌ ERROR: DATABASE_URL is not set"
   exit 1

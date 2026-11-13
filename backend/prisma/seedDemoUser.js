@@ -4,15 +4,7 @@ const bcrypt = require('bcryptjs');
 const prisma = require('../src/prisma');
 const { detectAndSavePRs } = require('../src/services/prDetection.service');
 
-/**
- * Generates 30 days of realistic, progressive workout history for a demo user.
- * Populates:
- * - Demo User & Profile (email: demo@fittrack.com / password: Password123!)
- * - 3 Structured Routines (Push, Pull, Legs & Core)
- * - 18 Completed Workout Sessions across the past 30 days
- * - Over 200+ individual SetLogs with progressive weights and reps
- * - Real Personal Records (PRs) detected and attributed with milestones
- */
+
 async function seedDemoUser() {
   console.log('🚀 Starting Demo User & 30-Day Workout History Seed...');
 
@@ -97,7 +89,7 @@ async function seedDemoUser() {
   // Fallback in case any exercise name slightly differs
   const getExercise = (name) => {
     if (exMap.has(name)) return exMap.get(name);
-    // Find partial match
+
     for (const [key, val] of exMap.entries()) {
       if (key.toLowerCase().includes(name.toLowerCase())) return val;
     }
@@ -171,12 +163,10 @@ async function seedDemoUser() {
 
   console.log('✅ Created 3 user routines with ordered exercises');
 
-  // 5. Generate 30 days of realistic workout history with progressive overload
   const now = new Date();
   const dayMs = 24 * 60 * 60 * 1000;
 
-  // Plan 18 workout days over the last 30 days
-  // Days ago from today:
+
   const workoutSchedule = [
     { daysAgo: 29, type: 'PUSH', routine: pushRoutine },
     { daysAgo: 28, type: 'PULL', routine: pullRoutine },
@@ -195,7 +185,7 @@ async function seedDemoUser() {
     { daysAgo: 5, type: 'LEGS', routine: legRoutine },
     { daysAgo: 3, type: 'PUSH', routine: pushRoutine },
     { daysAgo: 2, type: 'PULL', routine: pullRoutine },
-    { daysAgo: 0, type: 'LEGS', routine: legRoutine }, // Today! (keeps streak active)
+    { daysAgo: 0, type: 'LEGS', routine: legRoutine }, 
   ];
 
   let totalSessionsCreated = 0;

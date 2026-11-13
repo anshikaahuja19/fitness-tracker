@@ -1,11 +1,6 @@
 /* global require, module */
 const prisma = require('../prisma');
-
 /**
- * Calculates Estimated 1-Rep Max using the Epley formula:
- * 1RM = Weight * (1 + Reps / 30)
- * For 1 rep, 1RM equals the weight lifted.
- *
  * @param {number} weight
  * @param {number} reps
  * @returns {number}
@@ -20,21 +15,15 @@ const calculate1RM = (weight, reps) => {
 };
 
 /**
- * Detects and records any Personal Records (PRs) achieved by a completed set.
- * Checks for:
- * 1. MAX_WEIGHT: Heaviest weight lifted.
- * 2. MAX_VOLUME: Highest single-set volume (Weight * Reps).
- * 3. MAX_REPS: Highest repetitions performed.
- * 4. ESTIMATED_1RM: Highest calculated one-rep max.
  *
  * @param {object} params
- * @param {string} params.userId - User who performed the set
- * @param {string} params.exerciseId - Exercise performed
- * @param {string} [params.setLogId] - ID of the SetLog that achieved the PR
- * @param {number|string} params.weight - Weight lifted in kg/lbs
- * @param {number|string} params.reps - Reps performed
- * @param {object} [params.tx] - Optional Prisma transaction client
- * @returns {Promise<Array<object>>} - List of newly achieved PRs
+ * @param {string} params.userId 
+ * @param {string} params.exerciseId 
+ * @param {string} [params.setLogId] 
+ * @param {number|string} params.weight
+ * @param {number|string} params.reps 
+ * @param {object} [params.tx] 
+ * @returns {Promise<Array<object>>} 
  */
 const detectAndSavePRs = async ({ userId, exerciseId, setLogId, weight, reps, tx }) => {
   const db = tx || prisma;
@@ -76,7 +65,6 @@ const detectAndSavePRs = async ({ userId, exerciseId, setLogId, weight, reps, tx
     },
   ];
 
-  // Fetch all existing PRs for this user and exercise
   const existingPRs = await db.personalRecord.findMany({
     where: {
       userId,
@@ -95,16 +83,12 @@ const detectAndSavePRs = async ({ userId, exerciseId, setLogId, weight, reps, tx
     if (candidate.value <= 0) continue;
 
     const existing = existingMap.get(candidate.recordType);
-
-    // Is it a new record? (beats previous value, or first time recorded)
     const isNewRecord = !existing || candidate.value > existing.value;
 
     if (isNewRecord) {
       const oldValue = existing ? existing.value : null;
-
       let savedRecord;
       if (existing) {
-        // Update existing record with the new higher value
         savedRecord = await db.personalRecord.update({
           where: { id: existing.id },
           data: {
@@ -161,13 +145,11 @@ const detectAndSavePRs = async ({ userId, exerciseId, setLogId, weight, reps, tx
 };
 
 /**
- * Processes a batch of logged sets for a workout session and returns all new PRs.
- *
  * @param {object} params
- * @param {string} params.userId - Owner of the workout
- * @param {Array<object>} params.sets - Array of logged sets { exerciseId, weight, reps, id, isCompleted }
- * @param {object} [params.tx] - Optional Prisma transaction client
- * @returns {Promise<Array<object>>} - Aggregated list of all PRs broken in this session
+ * @param {string} params.userId 
+ * @param {Array<object>} params.sets 
+ * @param {object} [params.tx] 
+ * @returns {Promise<Array<object>>}
  */
 const processSessionPRs = async ({ userId, sets, tx }) => {
   if (!userId || !Array.isArray(sets) || sets.length === 0) {
@@ -177,7 +159,7 @@ const processSessionPRs = async ({ userId, sets, tx }) => {
   const allDetectedPRs = [];
 
   for (const set of sets) {
-    // Only completed sets can count as personal records
+    
     if (set.isCompleted === false) continue;
 
     const prs = await detectAndSavePRs({
