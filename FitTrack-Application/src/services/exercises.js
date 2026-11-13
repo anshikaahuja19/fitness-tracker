@@ -22,3 +22,13 @@ export async function createExercise(exercise) {
 export async function deleteExercise(id) {
   await api.delete(`/exercises/${id}`);
 }
+
+// What the user logged last time for each exercise (latest completed workout).
+// Returns { [exerciseId]: { sessionId, sessionName, performedAt, sets: [{ setNumber, weight, reps }] } }
+export async function fetchPreviousSets(exerciseIds, { excludeSessionId } = {}) {
+  if (!exerciseIds || exerciseIds.length === 0) return {};
+  const res = await api.get('/exercises/previous-sets', {
+    params: { ids: exerciseIds.join(','), excludeSessionId: excludeSessionId || undefined },
+  });
+  return res.data || {};
+}

@@ -28,6 +28,7 @@ import {
     updateSingleSessionSet,
     updateWorkoutSession,
 } from '../../services/workoutService';
+import { fetchPreviousSets } from '../../services/exercises';
 
 const DEFAULT_STARTER_SETS = 3;
 const DEFAULT_REST_SECONDS = 90;
@@ -155,6 +156,33 @@ export default function WorkoutsScreen({ navigation, route }) {
         totalSeconds: DEFAULT_REST_SECONDS,
         running: false,
     });
+
+    const [previousSetsByExercise, setPreviousSetsByExercise] = useState({});
+
+    const exerciseIdsKey = useMemo(
+        () => exerciseEntries.map((entry) => entry.exerciseId).sort().join(','),
+        [exerciseEntries]
+    );
+
+    // Load "previous" performance for every exercise in the workout (one request per change of exercise list).
+    useEffect(() => {
+        if (!exerciseIdsKey) return undefined;
+        let cancelled = false;
+        const realSessionId =
+            session?.id && !String(session.id).startsWith('local-') ? session.id : undefined;
+
+        fetchPreviousSets(exerciseIdsKey.split(','), { excludeSessionId: realSessionId })
+            .then((data) => {
+                if (!cancelled) setPreviousSetsByExercise(data);
+            })
+            .catch(() => {
+                // Previous data is a nice-to-have; never block the logger on it.
+            });
+
+        return () => {
+            cancelled = true;
+        };
+    }, [exerciseIdsKey, session?.id]);
 
     const isLocalDraft = Boolean(session?.id && String(session.id).startsWith('local-'));
 
@@ -809,6 +837,7 @@ export default function WorkoutsScreen({ navigation, route }) {
                             <WorkoutExerciseCard
                                 key={entry.exerciseId}
                                 entry={entry}
+                                previous={previousSetsByExercise[entry.exerciseId]}
                                 onChangeSetField={handleChangeSetField}
                                 onToggleSetComplete={handleToggleSetComplete}
                                 onAddSet={handleAddSet}

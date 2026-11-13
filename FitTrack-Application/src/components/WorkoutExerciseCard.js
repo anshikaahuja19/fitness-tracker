@@ -6,6 +6,7 @@ import { formatEnum } from '../utils/format';
 
 export default function WorkoutExerciseCard({
     entry,
+    previous,
     onChangeSetField,
     onToggleSetComplete,
     onAddSet,
@@ -19,6 +20,18 @@ export default function WorkoutExerciseCard({
             ? formatEnum(exercise.equipment)
             : null,
     ].filter(Boolean);
+
+    const previousByNumber = new Map((previous?.sets || []).map((item) => [item.setNumber, item]));
+    const previousDate = previous?.performedAt
+        ? new Date(previous.performedAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })
+        : null;
+
+    // Tapping the "previous" cell copies last time's numbers into this set.
+    const applyPrevious = (setRow, prev) => {
+        if (!prev || setRow.isCompleted) return;
+        onChangeSetField(entry.exerciseId, setRow.setNumber, 'weight', String(prev.weight));
+        onChangeSetField(entry.exerciseId, setRow.setNumber, 'reps', String(prev.reps));
+    };
 
     return (
         <Card style={styles.card}>
@@ -54,8 +67,15 @@ export default function WorkoutExerciseCard({
                 ) : null}
             </View>
 
+            {previousDate ? (
+                <Text style={styles.previousHint}>
+                    Last time: {previousDate} · {previous.sets.length} set{previous.sets.length === 1 ? '' : 's'}
+                </Text>
+            ) : null}
+
             <View style={styles.tableHeader}>
                 <Text style={[styles.colHeader, styles.setCol]}>SET</Text>
+                <Text style={[styles.colHeader, styles.prevCol]}>PREVIOUS</Text>
                 <Text style={[styles.colHeader, styles.inputCol]}>KG</Text>
                 <Text style={[styles.colHeader, styles.inputCol]}>REPS</Text>
                 <Text style={[styles.colHeader, styles.actionCol]}>DONE</Text>
@@ -64,6 +84,7 @@ export default function WorkoutExerciseCard({
 
             {sets.map((setRow) => {
                 const isDone = Boolean(setRow.isCompleted);
+                const prev = previousByNumber.get(setRow.setNumber);
 
                 return (
                     <View
@@ -78,6 +99,22 @@ export default function WorkoutExerciseCard({
                             </View>
                         </View>
 
+                        <Pressable
+                            onPress={() => applyPrevious(setRow, prev)}
+                            disabled={!prev || isDone}
+                            accessibilityRole="button"
+                            accessibilityLabel={
+                                prev
+                                    ? `Use previous ${prev.weight} kilograms for ${prev.reps} reps`
+                                    : 'No previous data'
+                            }
+                            style={({ pressed }) => [styles.prevCol, pressed && { opacity: 0.6 }]}
+                        >
+                            <Text style={[styles.prevText, !prev && styles.prevTextEmpty]} numberOfLines={1}>
+                                {prev ? `${prev.weight}×${prev.reps}` : '—'}
+                            </Text>
+                        </Pressable>
+
                         <View style={styles.inputCol}>
                             <TextInput
                                 style={styles.numberInput}
@@ -85,7 +122,7 @@ export default function WorkoutExerciseCard({
                                 onChangeText={(value) =>
                                     onChangeSetField(entry.exerciseId, setRow.setNumber, 'weight', value)
                                 }
-                                placeholder="0"
+                                placeholder={prev ? String(prev.weight) : '0'}
                                 placeholderTextColor={colors.textMuted}
                                 keyboardType="decimal-pad"
                                 selectTextOnFocus
@@ -99,7 +136,7 @@ export default function WorkoutExerciseCard({
                                 onChangeText={(value) =>
                                     onChangeSetField(entry.exerciseId, setRow.setNumber, 'reps', value)
                                 }
-                                placeholder="0"
+                                placeholder={prev ? String(prev.reps) : '0'}
                                 placeholderTextColor={colors.textMuted}
                                 keyboardType="number-pad"
                                 selectTextOnFocus
@@ -242,6 +279,25 @@ const styles = StyleSheet.create({
     },
     setNumberCompleted: {
         color: colors.success,
+    },
+    previousHint: {
+        fontSize: 12,
+        color: colors.textMuted,
+        marginTop: -spacing.xs,
+        marginBottom: spacing.sm,
+    },
+    prevCol: {
+        width: 64,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    prevText: {
+        fontSize: 12,
+        fontWeight: '600',
+        color: colors.textMuted,
+    },
+    prevTextEmpty: {
+        color: colors.border,
     },
     inputCol: {
         flex: 1,
