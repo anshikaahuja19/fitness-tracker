@@ -81,3 +81,5 @@ export const api = {
     patch: (path, body, options = {}) => apiRequest(path, { ...options, method: 'PATCH', body }),
     delete: (path, options = {}) => apiRequest(path, { ...options, method: 'DELETE' }),
 };
+
+export default api;

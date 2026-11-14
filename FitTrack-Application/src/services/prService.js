@@ -1,4 +1,4 @@
-import api from './api';
+import { api } from './api';
 
 /**
  * Fetches all personal records for the user, grouped by exercise.
