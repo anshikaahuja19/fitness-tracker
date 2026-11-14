@@ -54,13 +54,22 @@ app.use('/api/auth', authLimiter);
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true }));
 
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok', message: 'FitTrack API is running' });
+});
+
 app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'ok', message: 'FitTrack API is running' });
 });
 
 app.use('/api/auth', authRouter);
+app.use('/auth', authRouter);
+
 app.use('/api/users', userRouter);
+app.use('/users', userRouter);
+
 app.use('/api/exercises', exerciseRouter);
+app.use('/exercises', exerciseRouter);
 
 app.use('/api/v1/routines', routineRouter);
 app.use('/api/routines', routineRouter);
