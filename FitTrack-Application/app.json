@@ -11,6 +11,7 @@
       "bundleIdentifier": "com.fittrack.app"
     },
     "android": {
+      "package": "com.fittrack.app",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -22,7 +23,15 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-secure-store"
-    ]
+      "expo-secure-store",
+      "expo-font",
+      "expo-status-bar"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "b1ef2ac4-b37b-4ec2-8dd6-594dd90f18af"
+      }
+    },
+    "owner": "hartej46"
   }
 }
