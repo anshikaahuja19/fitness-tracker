@@ -272,6 +272,101 @@ npx expo start
 
 ---
 
+
+---
+
+## 🎮 Interactive 3D Biomechanics & Anatomical Engine (ISD Capstone)
+
+> **Lead Developer:** Raj Kumar | **Course:** Interactive Systems Development (ISD)  
+> **Technologies:** WebGL / Canvas Rendering, Unity 3D Architecture, Blender 4.x PBR Pipeline, React Native Animated API
+
+FitTrack includes a custom-built, real-time **Interactive 3D Biomechanics & Muscle Viewer** integrated directly into the exercise catalog. Designed to bridge mobile fitness tracking with sports science, it provides athletes and physical therapists with a 360-degree anatomical visualization of muscle recruitment, joint kinematics, and contraction dynamics during exercise execution.
+
+```
+                    ┌──────────────────────────────────────────────────┐
+                    │          FitTrack 3D Biomechanics Engine         │
+                    └─────────────────────────┬────────────────────────┘
+                                              │
+                    ┌─────────────────────────┴────────────────────────┐
+                    │                                                  │
+          ┌─────────▼──────────┐                             ┌─────────▼──────────┐
+          │      Unity 3D      │                             │    Blender 4.x     │
+          │  Engine Concepts   │                             │  Shading & Modeling│
+          ├────────────────────┤                             ├────────────────────┤
+          │ • Scene Graph      │                             │ • Principled BSDF  │
+          │ • Perspective Cam  │                             │ • 3-Point Lighting │
+          │ • Cinemachine Orbit│                             │ • Armature Rigging │
+          │ • Lifecycle Hooks  │                             │ • Shape Key Morphs │
+          │ • Viewport HUD     │                             │ • Wireframe Mesh   │
+          └────────────────────┘                             └────────────────────┘
+```
+
+---
+
+### 1. Unity 3D Game Engine Concepts Implemented
+
+The 3D engine (`Interactive3DViewer.js` and `Exercise3DModal.js`) mirrors standard **Unity 2022 LTS** GameObject, Component, and Scene architectures:
+
+| Unity 3D Concept | FitTrack Implementation | Architectural Detail |
+| :--- | :--- | :--- |
+| **Scene Graph Hierarchy** | `Exercise3DSceneManager.initScene()` | Hierarchical tree maintaining Camera, Lights, and Deformable Meshes under a parent transform container. |
+| **Perspective Camera** | `CameraConfig` ($FOV = 50^\circ$, near $0.1$, far $1000$) | Mathematically accurate 3D perspective frustum with ACES Filmic tone mapping and $Z$-axis depth clipping. |
+| **Cinemachine Orbital Controller** | `panResponder` with damping & clamping | Simulates Unity Cinemachine FreeLook Camera: touch velocity maps to $360^\circ$ Y-axis azimuth rotation and clamped $-30^\circ$ to $+50^\circ$ X-axis polar tilt. |
+| **MonoBehaviour Lifecycle** | `initScene()` $ightarrow$ `Update()` $ightarrow$ `dispose()` | Equivalent to Unity `Awake()`/`Start()` on modal open, per-frame touch handling in `Update()`, and memory teardown in `OnDestroy()`. |
+| **Camera View Presets** | Quick-rig camera buttons | One-tap cinematic camera positioning: *Front ($0^\circ$)*, *Side ($45^\circ$)*, *Profile ($90^\circ$)*, and *Isometric ($135^\circ$)*. |
+| **Turntable Showcase** | `autoRotate` interval loop | Continuous $360^\circ$ 60 FPS turntable showcase rotation without manual input. |
+
+---
+
+### 2. Blender 4.x Modeling, Shading & Animation Concepts Implemented
+
+The visual and material pipeline replicates **Blender 4.x Cycles/Eevee** rendering workflows:
+
+| Blender 4.x Concept | FitTrack Implementation | Technical Specification |
+| :--- | :--- | :--- |
+| **Principled BSDF PBR Shaders** | `MaterialLibrary` (`MeshStandardMaterial`) | Physically-Based Rendering with configurable surface roughness, metalness, and environment map reflectance. |
+| **Subsurface Scattering (SSS)** | `Anatomy_PBR` (roughness $0.72$, metalness $0.08$) | Simulates translucent light penetration through human dermal tissue for realistic muscular contouring. |
+| **Emissive Fresnel Shaders** | `Muscle_Emissive_PBR` (power $2.5$, glow red) | Edge-grazing Fresnel glow that dynamically highlights the active agonist muscle group during exercise execution. |
+| **Three-Point Studio Lighting** | `LightingConfig` (Blender Cycles rig) | **Key Light:** Sun Lamp ($1.1$ intensity, $2048$ shadow map at $45^\circ$); **Fill Light:** Ambient ($0.45$); **Rim Light:** Point Lamp ($0.65$ cyan) for silhouette depth. |
+| **Armature Rigging & Bone Groups** | `ExerciseMuscleMap` (`blenderBoneGroup`) | Maps 8 major muscle groups to anatomical skeletal bone chains (`chest_deform`, `back_deform`, `leg_deform`, etc.). |
+| **Shape Key Animation** | Dual `Animated.loop` sequences | Rest $\leftrightarrow$ Contracted morph animation: scales target mesh from $0.94	imes$ to $1.22	imes$ while modulating emissive glow intensity. |
+| **Wireframe Edit Mode** | `showWireframe` toggle | Overlays polygonal edge wireframe lines simulating Blender 3D Viewport Edit Mode ($Tab$ key). |
+
+---
+
+### 3. Real-Time Multi-Shader Render Modes
+
+The viewer features 3 switchable real-time shader presets:
+
+1. 🌟 **PBR Shaded (Realistic):** Full Principled BSDF material rendering with anatomical skin tones, glowing target muscle, and chrome equipment.
+2. 🔥 **EMG Heatmap (Neuromuscular Stress):** False-color biomechanical tension gradient (amber $ightarrow$ crimson energy) displaying peak contraction stress.
+3. 🔬 **X-Ray Holographic (Medical/Skeletal):** High-contrast cybernetic green x-ray silhouette emphasizing skeletal alignment and joint angles.
+
+---
+
+### 4. Interactive Biomechanics & Telemetry HUD
+
+The viewer overlays live sports-science telemetry directly in the viewport:
+* **Live EMG Activation Gauge:** Dynamic bar animating in sync with muscle contraction from $28\%$ (rest) to $96\%$ (peak concentric tension).
+* **Live Euler Angles:** Real-time HUD readout displaying `Orbit: X°`, `Tilt: Y°`, and `Zoom: 1.0x - 1.4x`.
+* **Biomechanical Spec Sheet:** Displays Primary Motor Unit, Synergist Muscles, Equipment, Contraction Axis (horizontal, vertical, flexion, extension), and anatomical Range of Motion (ROM in degrees).
+* **Graphics Pipeline Diagnostics:** Displays Shader type, Roughness/Metalness metrics, Lighting Rig parameters, and Camera Frustum details.
+
+---
+
+### 5. Architectural File Map (ISD Module)
+
+```text
+FitTrack-Application/src/
+ ├── components/
+ │    ├── Interactive3DViewer.js  # 3D Scene Graph, Camera, 3-Point Lighting, PBR Material Library & Muscle Map
+ │    ├── Exercise3DModal.js      # Full-Screen Modal, PanResponder 360° Orbit, Shaders, Mesh Rig & HUD
+ │    └── index.js                # Clean Component & Scene Manager Exports
+ └── screens/main/
+      └── ExercisesScreen.js      # Exercise catalog with "⚡ 3D View" interactive launch triggers
+```
+
+---
 ## 👥 Authors & Team
 * **Hartej** — Mobile App Architecture, Analytics UI & EAS Android Packaging
 * **Anshika** — Frontend Authentication Flow, Secure Storage & Routine Builder
