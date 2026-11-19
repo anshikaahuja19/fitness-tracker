@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { Button, Card, Chip, Input, ScreenContainer } from '../../components';
+import { ActivityIndicator, FlatList, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Button, Card, Chip, Input, ScreenContainer, Exercise3DModal } from '../../components';
 import AddExerciseModal from '../../components/AddExerciseModal';
 import { createExercise, fetchExerciseOptions, fetchExercises } from '../../services/exercises';
 import { colors, spacing, typography } from '../../constants/theme';
@@ -15,13 +15,22 @@ const FALLBACK_OPTIONS = {
 
 const SEARCH_DEBOUNCE_MS = 350;
 
-function ExerciseRow({ exercise }) {
+function ExerciseRow({ exercise, onSelect3D }) {
   const details = [formatEnum(exercise.primaryMuscle), formatEnum(exercise.equipment)].join(' · ');
   return (
-    <Card style={styles.row}>
+    <Card style={styles.row} onPress={() => onSelect3D && onSelect3D(exercise)}>
       <View style={styles.rowHeader}>
         <Text style={styles.rowTitle}>{exercise.name}</Text>
-        {exercise.isCustom ? <Text style={styles.badge}>Custom</Text> : null}
+        <View style={styles.badgeGroup}>
+          <TouchableOpacity
+            activeOpacity={0.7}
+            style={styles.badge3D}
+            onPress={() => onSelect3D && onSelect3D(exercise)}
+          >
+            <Text style={styles.badge3DText}>⚡ 3D View</Text>
+          </TouchableOpacity>
+          {exercise.isCustom ? <Text style={styles.badge}>Custom</Text> : null}
+        </View>
       </View>
       <Text style={styles.rowSub}>{details}</Text>
     </Card>
@@ -38,6 +47,7 @@ export default function ExercisesScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [selected3DExercise, setSelected3DExercise] = useState(null);
 
   useEffect(() => {
     const id = setTimeout(() => setDebouncedSearch(search.trim()), SEARCH_DEBOUNCE_MS);
@@ -125,12 +135,18 @@ export default function ExercisesScreen() {
       <FlatList
         data={loading || error ? [] : exercises}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <ExerciseRow exercise={item} />}
+        renderItem={({ item }) => <ExerciseRow exercise={item} onSelect3D={setSelected3DExercise} />}
         ListEmptyComponent={renderEmpty}
         refreshing={refreshing}
         onRefresh={onRefresh}
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={styles.list}
+      />
+
+      <Exercise3DModal
+        visible={!!selected3DExercise}
+        exercise={selected3DExercise}
+        onClose={() => setSelected3DExercise(null)}
       />
 
       <AddExerciseModal
@@ -156,6 +172,20 @@ const styles = StyleSheet.create({
   rowHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   rowTitle: { ...typography.h3, flexShrink: 1 },
   rowSub: { ...typography.caption, marginTop: spacing.xs },
+  badgeGroup: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  badge3D: {
+    backgroundColor: '#0284c7',
+    paddingHorizontal: 9,
+    paddingVertical: 3,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#38bdf8',
+  },
+  badge3DText: {
+    color: '#ffffff',
+    fontSize: 11,
+    fontWeight: 'bold',
+  },
   badge: {
     fontSize: 12,
     fontWeight: '600',

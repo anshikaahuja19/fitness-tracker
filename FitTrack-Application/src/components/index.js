@@ -9,3 +9,12 @@ export {
     SkeletonRow,
     SkeletonChart,
 } from './Skeleton';
+export { default as Exercise3DModal } from './Exercise3DModal';
+export {
+    Exercise3DSceneManager,
+    SceneConfig,
+    CameraConfig,
+    LightingConfig,
+    MaterialLibrary,
+    ExerciseMuscleMap,
+} from './Interactive3DViewer';
